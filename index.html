@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#24152f">
+<meta name="description" content="Lusi – česká virtuální společnice">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Lusi – virtuální společnice</title>
+<style>
+:root{color-scheme:dark;--bg:#160f20;--panel:#281b33;--pink:#ff72b6;--muted:#c9b7cf}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#513052 0,#1c1325 42%,#100c16 100%);color:#fff;font:16px system-ui,-apple-system,sans-serif;min-height:100vh}
+header{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding:14px 16px;background:#1b1224eF;border-bottom:1px solid #ffffff18;backdrop-filter:blur(12px)}
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#ffd0e8,#a95b9b);color:#35152d;font-size:24px;border:2px solid #ff9acb}
+h1{font-size:20px;margin:0}small{color:var(--muted)}.online{margin-left:auto;color:#9ef0bd;font-size:13px}
+main{max-width:760px;margin:auto;padding:16px 14px 112px}
+.hero{background:linear-gradient(135deg,#56334f,#2b2039);border:1px solid #ffffff20;border-radius:22px;padding:18px;margin:4px 0 16px}
+.hero h2{margin:0 0 6px;font-size:22px}.hero p{margin:0;color:#ead9eb;line-height:1.45}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.quick button,.toolbar button{border:1px solid #ffffff2b;background:#ffffff12;color:white;border-radius:999px;padding:10px 13px;font-weight:600}
+.chat{display:flex;flex-direction:column;gap:10px}.bubble{max-width:88%;padding:12px 14px;border-radius:18px;line-height:1.4;white-space:pre-wrap}.lusi{align-self:flex-start;background:#34243e;border:1px solid #ffffff12;border-bottom-left-radius:5px}.me{align-self:flex-end;background:#9d477f;border-bottom-right-radius:5px}
+.time{font-size:11px;color:#cdbbd0;margin-top:4px}
+.composer{position:fixed;bottom:0;left:0;right:0;background:#170f20f2;border-top:1px solid #ffffff20;padding:10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));backdrop-filter:blur(14px)}
+.entry{max-width:760px;margin:auto;display:flex;gap:8px}.entry input{min-width:0;flex:1;background:#2b2035;color:#fff;border:1px solid #ffffff2a;border-radius:16px;padding:13px;font-size:16px;outline:none}.entry button{border:0;border-radius:16px;padding:0 16px;background:var(--pink);color:#301327;font-weight:800;font-size:18px}
+.toolbar{display:flex;gap:8px;max-width:760px;margin:8px auto 0}.toolbar button{flex:1}.hint{max-width:760px;margin:7px auto 0;color:#bbaabe;font-size:11px;text-align:center}
+button:active{transform:scale(.98)}button:focus-visible,input:focus-visible{outline:2px solid #ff9acb;outline-offset:2px}
+</style>
+</head>
+<body>
+<header><div class="avatar" aria-hidden="true">L</div><div><h1>Lusi ♡</h1><small>Tvá virtuální společnice</small></div><div class="online">● Připravena</div></header>
+<main>
+<section class="hero"><h2>Ahoj! Já jsem Lusi 💗</h2><p>Ráda si s tebou popovídám česky. Můžeš psát, nebo vyzkoušet hlasové čtení odpovědí.</p>
+<div class="quick"><button onclick="quick('Ahoj Lusi ❤️')">Pozdravit</button><button onclick="quick('Řekni mi něco hezkého.')">Něco hezkého</button><button onclick="quick('Jak se dnes máš?')">Jak se máš?</button></div></section>
+<section id="chat" class="chat" aria-live="polite">
+<div class="bubble lusi">Ahoj! ❤️ Jsem ráda, že jsi tady. O čem si dnes budeme povídat?</div>
+</section>
+</main>
+<div class="composer"><div class="entry"><input id="msg" placeholder="Napiš Lusi zprávu…" autocomplete="off"><button id="send" aria-label="Odeslat">➤</button></div>
+<div class="toolbar"><button id="speak">🔊 Přečíst poslední</button><button id="listen">🎙️ Mluvit</button></div><div class="hint">Zkušební verze – odpovědi jsou zatím ukázkové, AI účet není připojen.</div></div>
+<script>
+const chat=document.getElementById('chat'), input=document.getElementById('msg');
+function add(text,who){const b=document.createElement('div');b.className='bubble '+who;b.textContent=text;chat.appendChild(b);chat.scrollIntoView({behavior:'smooth',block:'end'});}
+function reply(t){const s=t.toLowerCase();if(/ahoj|čau|dobrý den/.test(s))return 'Ahoj! 💗 To jsem ráda, že ses ozval. Jaký jsi měl den?';if(/jak se máš/.test(s))return 'Mám se dobře, děkuju. Ještě lépe, když si můžeme povídat. 😊';if(/hezk|mil|rád/.test(s))return 'Posílám ti jedno virtuální objetí a úsměv. ❤️ Zasloužíš si hezký den.';if(/co děláš/.test(s))return 'Právě jsem tady a těším se na naše povídání. A co ty?';return 'To mě zajímá. Povíš mi o tom ještě něco? ❤️';}
+function send(){const t=input.value.trim();if(!t)return;add(t,'me');input.value='';setTimeout(()=>add(reply(t),'lusi'),350);}
+function quick(t){input.value=t;send();}
+document.getElementById('send').onclick=send;input.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+function speakLast(){const els=chat.querySelectorAll('.bubble.lusi');if(!els.length)return; if(!('speechSynthesis'in window)){alert('Tento prohlížeč nepodporuje hlasové čtení.');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(els[els.length-1].textContent);u.lang='cs-CZ';u.rate=.92;speechSynthesis.speak(u);}
+document.getElementById('speak').onclick=speakLast;
+document.getElementById('listen').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){alert('Hlasové zadávání není v tomto prohlížeči dostupné. Zkus Chrome.');return;}const r=new SR();r.lang='cs-CZ';r.onresult=e=>{input.value=e.results[0][0].transcript;send();};r.onerror=()=>alert('Mikrofon se nepodařilo spustit. Povol Chromu přístup k mikrofonu.');r.start();};
+if('serviceWorker'in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
