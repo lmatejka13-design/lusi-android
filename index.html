@@ -1,4 +1,311 @@
-<!doctype html>
+<!doctype html><!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#24152f">
+<meta name="description" content="Lusi – česká virtuální společnice">
+<title>Lusi ❤️ Virtuální společnice</title>
+
+<style>
+:root {
+  --bg: #160f20;
+  --panel: #281b33;
+  --pink: #ff72b6;
+  --muted: #c9b7cf;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at top,#513052,#160f20 65%);
+  color: white;
+  font: 16px system-ui,sans-serif;
+  min-height: 100vh;
+}
+header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  background: #1b1224;
+  border-bottom: 1px solid #ffffff22;
+}
+.avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg,#ffd0e8,#a95b9b);
+  color: #35152d;
+  font-size: 25px;
+}
+h1 { font-size: 21px; margin: 0; }
+small { color: var(--muted); }
+.online { margin-left: auto; color: #9ef0bd; }
+main {
+  max-width: 760px;
+  margin: auto;
+  padding: 16px 14px 150px;
+}
+.hero {
+  background: linear-gradient(135deg,#56334f,#2b2039);
+  border: 1px solid #ffffff20;
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.hero h2 { margin: 0 0 8px; }
+.hero p { color: #ead9eb; line-height: 1.5; }
+.quick {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+button {
+  cursor: pointer;
+  border: 1px solid #ffffff30;
+  background: #ffffff12;
+  color: white;
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-weight: 600;
+}
+button:hover { background: #9d477f; }
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bubble {
+  max-width: 88%;
+  padding: 13px 15px;
+  border-radius: 18px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.lusi {
+  align-self: flex-start;
+  background: #34243e;
+}
+.me {
+  align-self: flex-end;
+  background: #9d477f;
+}
+.composer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #170f20f5;
+  padding: 12px;
+  border-top: 1px solid #ffffff25;
+}
+.entry {
+  max-width: 760px;
+  margin: auto;
+  display: flex;
+  gap: 8px;
+}
+.entry input {
+  flex: 1;
+  min-width: 0;
+  background: #2b2035;
+  color: white;
+  border: 1px solid #ffffff35;
+  border-radius: 14px;
+  padding: 13px;
+  font-size: 16px;
+}
+#send {
+  background: var(--pink);
+  color: #301327;
+  font-size: 19px;
+}
+.toolbar {
+  display: flex;
+  gap: 8px;
+  max-width: 760px;
+  margin: 9px auto 0;
+}
+.toolbar button { flex: 1; }
+.hint {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="avatar">❤️</div>
+  <div>
+    <h1>Lusi</h1>
+    <small>Tvoje virtuální společnice</small>
+  </div>
+  <div class="online">● Online</div>
+</header>
+
+<main>
+  <section class="hero">
+    <h2>Ahoj, jsem Lusi! 💗</h2>
+    <p>
+      Jsem ráda, že jsi tady.
+      Můžeme si povídat, smát se a sdílet společné chvíle.
+    </p>
+    <div class="quick">
+      <button onclick="quick('Ahoj Lusi ❤️')">Pozdravit</button>
+      <button onclick="quick('Řekni mi něco hezkého.')">Něco hezkého</button>
+      <button onclick="quick('Jak se dnes máš?')">Jak se máš?</button>
+    </div>
+  </section>
+
+  <div class="chat" id="chat" aria-live="polite">
+    <div class="bubble lusi">
+      Ahoj! ❤️ Jsem ráda, že jsi tady.
+      O čem si dnes budeme povídat?
+    </div>
+  </div>
+</main>
+
+<div class="composer">
+  <div class="entry">
+    <input id="msg" placeholder="Napiš Lusi zprávu..." autocomplete="off">
+    <button id="send" aria-label="Odeslat">➤</button>
+  </div>
+
+  <div class="toolbar">
+    <button id="speak">🔊 Přečíst odpověď</button>
+    <button id="listen">🎙️ Mluvit</button>
+  </div>
+
+  <div class="hint" id="status">
+    Testovací rozhraní – čeká na připojení AI serveru.
+  </div>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('msg');
+const statusText = document.getElementById('status');
+
+// Adresa zabezpečeného AI serveru
+const API_URL = '/api/chat';
+
+function add(text, who) {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble ' + who;
+  bubble.textContent = text;
+  chat.appendChild(bubble);
+  window.scrollTo({
+    top: document.body.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  add(text, 'me');
+  input.value = '';
+  statusText.textContent = 'Lusi přemýšlí...';
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: text })
+    });
+
+    if (!response.ok) {
+      throw new Error('Server odpověděl chybou.');
+    }
+
+    const data = await response.json();
+
+    if (!data.reply) {
+      throw new Error('Server neposlal odpověď.');
+    }
+
+    add(data.reply, 'lusi');
+    statusText.textContent = 'Odpověď přijata ❤️';
+
+  } catch (error) {
+    add(
+      'Zatím se mi nepodařilo spojit s AI serverem. ❤️ Až bude server připojený, budeme si moci povídat.',
+      'lusi'
+    );
+    statusText.textContent = 'AI server zatím není připojen.';
+  }
+}
+
+function quick(text) {
+  input.value = text;
+  send();
+}
+
+document.getElementById('send').onclick = send;
+
+input.addEventListener('keydown', event => {
+  if (event.key === 'Enter') send();
+});
+
+function speakLast() {
+  const messages = chat.querySelectorAll('.bubble.lusi');
+  if (!messages.length) return;
+
+  if (!('speechSynthesis' in window)) {
+    alert('Prohlížeč nepodporuje hlasové čtení.');
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(
+    messages[messages.length - 1].textContent
+  );
+
+  utterance.lang = 'cs-CZ';
+  utterance.rate = 0.92;
+  speechSynthesis.speak(utterance);
+}
+
+document.getElementById('speak').onclick = speakLast;
+
+document.getElementById('listen').onclick = () => {
+  const Recognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!Recognition) {
+    alert('Hlasové zadávání zkus v prohlížeči Google Chrome.');
+    return;
+  }
+
+  const recognition = new Recognition();
+  recognition.lang = 'cs-CZ';
+
+  recognition.onresult = event => {
+    input.value = event.results[0][0].transcript;
+    send();
+  };
+
+  recognition.onerror = () => {
+    alert('Povol Chromu přístup k mikrofonu.');
+  };
+
+  recognition.start();
+};
+</script>
+
+</body>
+</html>
 <html lang="cs">
 <head>
 <meta charset="utf-8">
